@@ -22,7 +22,7 @@ def populate_database():
         print("Raccolta e pulizia dei tag unici dal file CSV...")
         all_genres, all_decades, all_topics, all_langs, all_moods = set(), set(), set(), set(), set()
 
-        with open('stations_final.csv', 'r', encoding='utf-8') as f:
+        with open('scripts/stations_final.csv', 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 # Per ogni categoria, splitta la stringa e applica .strip() a ogni singolo tag
@@ -59,7 +59,7 @@ def populate_database():
 
         # --- STEP 3: Popolamento delle Stazioni e Creazione delle Relazioni ---
         print("Popolamento della tabella Station e creazione delle relazioni...")
-        with open('stations_final.csv', 'r', encoding='utf-8') as f:
+        with open('scripts/stations_final.csv', 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 # Applichiamo .strip() a tutti i campi di testo della stazione
