@@ -29,13 +29,19 @@ station_moods = db.Table('station_moods',
     db.Column('mood_id', db.Integer, db.ForeignKey('mood.id'), primary_key=True)
 )
 
+user_favorites = db.Table('user_favorites',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('station_id', db.Integer, db.ForeignKey('station.id'), primary_key=True)
+)
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    # Rimuoviamo l'email per ora per semplicità, ma la lasciamo commentata per il futuro
-    # email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    favorite_stations = db.relationship('Station', secondary=user_favorites, lazy='dynamic')
+    play_history = db.relationship('PlayHistory', backref='user', lazy='dynamic',
+                                   order_by="desc(PlayHistory.played_at)")
 
     def set_password(self, password):
         """Crea l'hash della password."""
@@ -100,3 +106,11 @@ class Mood(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     stations = db.relationship('Station', secondary=station_moods, back_populates='moods')
+
+
+class PlayHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    station_id = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    played_at = db.Column(db.DateTime, default=datetime.utcnow)
+    station = db.relationship('Station')
