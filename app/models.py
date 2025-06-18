@@ -81,7 +81,7 @@ class Station(db.Model):
     topics = db.relationship('Topic', secondary=station_topics, back_populates='stations')
     langs = db.relationship('Lang', secondary=station_langs, back_populates='stations')
     moods = db.relationship('Mood', secondary=station_moods, back_populates='stations')
-    playlists = db.relationship('Playlist', secondary=playlist_station_association, back_populates='playlist_stations')
+    playlists = db.relationship('Playlist', secondary=playlist_station_association, back_populates='stations')
 
 
 
