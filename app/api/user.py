@@ -1,8 +1,11 @@
-from app.models import User, Station, PlayHistory
+from sqlalchemy.testing.util import total_size
+
+from app.models import User, Station, PlayHistory, Playlist
 from app.api import bp
 from app import db
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from .playlist import playlists_schema
 
 from .stations import stations_schema, StationSchema, ma
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
@@ -98,4 +101,22 @@ def get_history():
         'total_pages': pagination.pages,
         'page': page,
         'per_page': per_page
+    })
+
+@bp.route('/user/playlists', methods=['GET'])
+@jwt_required()
+def get_my_playlists():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 30, type=int)
+    current_user_id = get_jwt_identity()
+    user = User.query.get_or_404(current_user_id)
+    pagination = (user.playlists.order_by(Playlist.created_at.desc())
+                  .paginate(page=page, per_page=per_page, error_out=False))
+    my_playlists = pagination.items
+    return jsonify({
+        "items" : playlists_schema.dump(my_playlists),
+        "total_items": pagination.total,
+        "total_pages": pagination.pages,
+        "page": page,
+        "per_page": per_page
     })

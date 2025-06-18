@@ -34,6 +34,11 @@ user_favorites = db.Table('user_favorites',
     db.Column('station_id', db.Integer, db.ForeignKey('station.id'), primary_key=True)
 )
 
+playlist_station_association = db.Table('playlist_station',
+    db.Column('playlist_id', db.Integer, db.ForeignKey('playlist.id'), primary_key=True),
+    db.Column('station_id', db.Integer, db.ForeignKey('station.id'), primary_key=True)
+)
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -42,6 +47,7 @@ class User(db.Model):
     favorite_stations = db.relationship('Station', secondary=user_favorites, lazy='dynamic')
     play_history = db.relationship('PlayHistory', backref='user', lazy='dynamic',
                                    order_by="desc(PlayHistory.played_at)")
+    playlists = db.relationship('Playlist', backref='owner', lazy='dynamic')
 
     def set_password(self, password):
         """Crea l'hash della password."""
@@ -75,6 +81,7 @@ class Station(db.Model):
     topics = db.relationship('Topic', secondary=station_topics, back_populates='stations')
     langs = db.relationship('Lang', secondary=station_langs, back_populates='stations')
     moods = db.relationship('Mood', secondary=station_moods, back_populates='stations')
+    playlists = db.relationship('Playlist', secondary=playlist_station_association, backref='playlist_stations')
 
 
 
@@ -114,3 +121,18 @@ class PlayHistory(db.Model):
     station_id = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
     played_at = db.Column(db.DateTime, default=datetime.utcnow)
     station = db.relationship('Station')
+
+
+class Playlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    is_public = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    stations = db.relationship('Station', secondary=playlist_station_association, lazy='dynamic')
+
+    def __repr__(self):
+        return f'<Playlist {self.name}>'
