@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from .config import Config
+from flask_cors import CORS
 
 # Inizializza le estensioni, ma senza un'app specifica
 db = SQLAlchemy()
@@ -15,6 +16,8 @@ def create_app(config_class=Config):
     # Crea e configura l'istanza dell'app
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # Lega le estensioni all'istanza dell'app
     db.init_app(app)
